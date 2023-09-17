@@ -79,6 +79,7 @@ class Argument extends Variable { }
 class LuaClass {
     constructor() {
         this.name = "";
+        this.parent = "";
         this.desc = [];
         this.vars = [];
         this.funcs = [];
@@ -126,7 +127,13 @@ function parse(lua) {
             c = new LuaClass();
             let s = l.split(/ /);
             c.name = s[1];
-            c.desc.push(s.slice(2).join(' '));
+            // console.log(s)
+            if (s[2] == ':') {
+                c.parent = s[3]
+                c.desc.push(s.slice(4).join(' '));
+            } else {
+                c.desc.push(s.slice(2).join(' '));
+            }
             classes.push(c);
             for(let j = linenum; j < lines.length; j++) {
                 ln = lines[j]
