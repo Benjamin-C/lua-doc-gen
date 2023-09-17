@@ -65,6 +65,7 @@ class Variable {
         this.desc = desc || "";
         this.val = val || "";
         this.vis = vis || "public";
+        // console.log(this.vis, vis)
     }
 
     toString() {
@@ -97,7 +98,7 @@ class LuaClass {
  */
 
 // TODO Should probably get thes from args
-let sourcefilename = "Window.lua"
+let sourcefilename = "./pOS/os/gui/Window.lua"
 let templatename = "classDef.html"
 let outputfilename = "output.html"
 
@@ -133,8 +134,11 @@ function parse(lua) {
                     if(ln.startsWith('---')) {
                         if(ln.startsWith('---@field')) {
                             let s = ln.split(/^---@field\s+(?:(private|protected|package)\s+)?(\S*)\s+(\S*)(?:\s+(.*))?\s*$/);
-                            if(s.length > 4) {
-                                c.vars.push(new Variable(name=s[2], type=s[3], desc=s[4], vis=s[1]));
+                            if (s.length > 4) {
+                                var variable = new Variable(name = s[2], type = s[3], desc = s[4], vis = s[1])
+                                variable.vis = s[1] || 'public'
+                                c.vars.push(variable);
+                                // console.log(s, s[1], variable.vis)
                             }
                         } else if(ln.startsWith('---@class')) {
                             // Already used this
@@ -220,35 +224,35 @@ function parse(lua) {
     return [classes, funcs]
 }
 
-let r = parse(loadFile(sourcefilename))
+// let r = parse(loadFile(sourcefilename))
 
-this.name = "";
-this.desc = "";
-this.vars = [];
-this.funcs = [];
+// this.name = "";
+// this.desc = "";
+// this.vars = [];
+// this.funcs = [];
 
-Object.keys(r[0]).forEach((k) => {
-    c = r[0][k];
-    console.log("Class " + c.name);
-    c.desc.forEach((d) => {
-        console.log('\t' + d);
-    });
-    console.log("Fields:");
-    c.vars.forEach((k) => {
-        console.log(k.toString('\t'));
-    });
-    console.log("Methods:");
-    c.funcs.forEach((k) => {
-        console.log(k.toString('\t'));
-    });
-});
+// Object.keys(r[0]).forEach((k) => {
+//     c = r[0][k];
+//     console.log("Class " + c.name);
+//     c.desc.forEach((d) => {
+//         console.log('\t' + d);
+//     });
+//     console.log("Fields:");
+//     c.vars.forEach((k) => {
+//         console.log(k.toString('\t'));
+//     });
+//     console.log("Methods:");
+//     c.funcs.forEach((k) => {
+//         console.log(k.toString('\t'));
+//     });
+// });
 
-console.log("Functions");
-r[1].forEach((f) => {
-    console.log(f.toString());
-});
+// console.log("Functions");
+// r[1].forEach((f) => {
+//     console.log(f.toString());
+// });
 
-console.log("done");
+// console.log("done");
 
 
 // l = '---@field private x number Window X origin'
@@ -259,3 +263,12 @@ console.log("done");
 // // private protected package
 // let s = l.split(/^---@field\s+(?:(private|protected|package)\s+)?(\S*)\s+(\S*)(?:\s+(.*))?\s*$/)
 // console.log(s)
+
+module.exports = {
+    loadFile,
+    parse,
+    Variable,
+    Argument,
+    Function,
+    LuaClass
+}
