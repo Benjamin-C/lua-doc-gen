@@ -20,7 +20,6 @@ function varToHtmlTable(variable) {
 }
 function varToHtmlDb(variable) {
     html = `<div class="datablock" id=${variable.name}><h3>${varToHtml(variable)}</h3>`
-    console.log(`${variable.name} ${variable.vis}`)
     if (variable.vis != 'public') {
         html += `<span class=vis>${variable.vis}</span><br/>`
     }
@@ -93,7 +92,11 @@ function classToHTML(data) {
     Object.keys(data[0]).forEach((k) => {
         c = data[0][k];
         html = html.replaceAll('%ClassName%', c.name)
-        html = html.replaceAll('%ClassDesc%', c.desc.join('<br/>'))
+        var desc = c.desc.join('<br/>')
+        if (c.parent != '') {
+            desc = `<h4>Inherits from <code class=type>${c.parent}</code></h4>` + desc
+        }
+        html = html.replaceAll('%ClassDesc%', desc)
         
         var vars = ''
         var varDbs = ''
@@ -126,6 +129,6 @@ function classToHTML(data) {
     return html
 }
 
-var windowData = parse(loadFile('./pOS/os/gui/TextInput.lua'))
+var windowData = parse(loadFile('./pOS/os/gui/Window.lua'))
 // console.log(windowData)
 saveFile('./lua-doc-gen/output.html', classToHTML(windowData))

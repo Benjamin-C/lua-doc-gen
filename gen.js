@@ -217,6 +217,7 @@ function parse(lua) {
                             }
                         } else if(ln.startsWith('---@return')) {
                             // not sure why this be here
+                            /**@todo Fix this so the name of the variable is not "return"*/
                             let s = ln.split(/^---@return\s+(\S*)(?:\s+(.*))?\s*$/)
                             f.ret.push(new Variable("return", s[1], s[2]));
                         } else {
