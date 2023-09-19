@@ -1,18 +1,36 @@
 {
     "UiElement": {
-        "path": "os/gui/UiElement"
+        "path": "os/gui/UiElement.html",
+        "children": [
+            "TextBox",
+            "TextInput",
+            "Button",
+            "ScrollField",
+            "MenuOption"
+        ]
     },
     "Window": {
-        "path": "os/gui/Window"
+        "path": "os/gui/Window.html"
     },
     "color": {
-        "ext": true,
         "path": "https://tweaked.cc/module/colors.html"
     },
     "TextBox": {
-        "path": "os/gui/TextBox"
+        "path": "os/gui/TextBox.html"
     },
     "ScrollField": {
-        "path": "os/gui/ScrollField"
+        "path": "os/gui/ScrollField.html"
+    },
+    "TextInput": {
+        "path": "os/gui/TextInput.html"
+    },
+    "Button": {
+        "path": "os/gui/Button.html"
+    },
+    "FileSelector": {
+        "path": "os/gui/FileSelector.html"
+    },
+    "MenuOption": {
+        "path": "os/gui/MenuOption.html"
     }
 }

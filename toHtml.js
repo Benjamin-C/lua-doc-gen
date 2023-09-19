@@ -11,7 +11,7 @@ function saveFile(path, data) {
 }
 
 // const baseDocPath = '/minecraft/cc/doc/'
-const baseDocPath = ''
+const baseDocPath = 'file:///C:/Users/pcral/Documents/CC/lua-doc-gen/'
 
 /**
  * 
@@ -121,64 +121,101 @@ function funcToHtmlDb(func) {
     return s + "</div>"
 }
 
-function classToHTML(data) {
+function classToHTML(c) {
     var html = loadFile(classDef)
-    // console.log(html)
-    // data.forEach(element => {
-    //     console.log(element)
-    // });
-    Object.keys(data[0]).forEach((k) => {
-        c = data[0][k];
-        if (!knownClasses[c.name]) {
-            knownClasses[c.name] = {
-                path: c.name
+    if (!knownClasses[c.name]) {
+        knownClasses[c.name] = {
+            path: c.name
+        }
+        fs.writeFileSync(knownClassFile, JSON.stringify(knownClasses))
+    }
+    knownClasses[c.name].cur = true
+    html = html.replaceAll('%ClassName%', c.name)
+    var desc = c.desc.join('<br/>')
+    if (c.parent != '') {
+        desc = `<h4>Inherits from ${typeToHtml(c.parent)}</h4>` + desc
+        if (knownClasses[c.parent]) {
+            if (!knownClasses[c.parent].children) knownClasses[c.parent].children = []
+            var isIn = false
+            for (let i = 0; i < knownClasses[c.parent].children.length; i++) {
+                const ch = knownClasses[c.parent].children[i];
+                if (ch == c.name) {
+                    isIn = true
+                    break
+                }
             }
-            fs.writeFileSync(knownClassFile, JSON.stringify(knownClasses))
-            knownClasses[c.name].cur = true
+            if (!isIn) {
+                knownClasses[c.parent].children.push(c.name)
+                knownClasses[c.name].cur = undefined
+                fs.writeFileSync(knownClassFile, JSON.stringify(knownClasses))
+                knownClasses[c.name].cur = true
+            }
         }
-        html = html.replaceAll('%ClassName%', c.name)
-        var desc = c.desc.join('<br/>')
-        if (c.parent != '') {
-            desc = `<h4>Inherits from ${typeToHtml(c.parent)}</h4>` + desc
-        }
-        html = html.replaceAll('%ClassDesc%', desc)
+    }
+    html = html.replaceAll('%ClassDesc%', desc)
 
-        if (c.const) {
-            html = html.replaceAll('%Constructor%', funcToHtmlDb(c.const))
-        }
-        
-        var vars = ''
-        var varDbs = ''
-        c.vars.forEach((k) => {
-            vars += varToHtmlTable(k)
-            varDbs += varToHtmlDb(k)
-        });
-        html = html.replaceAll('%TableVariables%', vars)
-        html = html.replaceAll('%Variables%', varDbs)
-        
-        var funcs = ''
-        var funcDbs = ''
-        var instFuncs = ''
-        var instFuncDbs = ''
-        c.funcs.forEach((k) => {
-            if (k.type == 'instance') {
-                instFuncs += funcToHtmlTable(k)
-                instFuncDbs += funcToHtmlDb(k)
-            } else {
-                funcs += funcToHtmlTable(k)
-                funcDbs += funcToHtmlDb(k)
-            }
-        });
-        html = html.replaceAll('%TableFunctions%', funcs)
-        html = html.replaceAll('%Functions%', funcDbs)
-        html = html.replaceAll('%TableInstanceFunctions%', instFuncs)
-        html = html.replaceAll('%InstanceFunctions%', instFuncDbs)
-        knownClasses[c.name].cur = undefined
+    if (c.const) {
+        html = html.replaceAll('%Constructor%', funcToHtmlDb(c.const))
+    }
+    
+    var vars = ''
+    var varDbs = ''
+    c.vars.forEach((k) => {
+        vars += varToHtmlTable(k)
+        varDbs += varToHtmlDb(k)
     });
-    // console.log(html)
+    html = html.replaceAll('%TableVariables%', vars)
+    html = html.replaceAll('%Variables%', varDbs)
+    
+    var funcs = ''
+    var funcDbs = ''
+    var instFuncs = ''
+    var instFuncDbs = ''
+    c.funcs.forEach((k) => {
+        if (k.type == 'instance') {
+            instFuncs += funcToHtmlTable(k)
+            instFuncDbs += funcToHtmlDb(k)
+        } else {
+            funcs += funcToHtmlTable(k)
+            funcDbs += funcToHtmlDb(k)
+        }
+    });
+    html = html.replaceAll('%TableFunctions%', funcs)
+    html = html.replaceAll('%Functions%', funcDbs)
+    html = html.replaceAll('%TableInstanceFunctions%', instFuncs)
+    html = html.replaceAll('%InstanceFunctions%', instFuncDbs)
+    
+    var ch = ''
+    if (knownClasses[c.name].children) {
+        for (let i = 0; i < knownClasses[c.name].children.length; i++) {
+            const cd = knownClasses[c.name].children[i];
+            if (i > 0) ch += ' '
+            ch += typeToHtml(cd)
+        }
+    }
+    html = html.replaceAll('%ChildClasses%', ch)
+
+    knownClasses[c.name].cur = undefined
     return html
 }
 
-var windowData = parse(loadFile('./pOS/os/gui/ScrollField.lua'))
-// console.log(windowData)
-saveFile('./lua-doc-gen/output.html', classToHTML(windowData))
+// var windowData = parse(loadFile('./pOS/os/gui/UiElement.lua'))
+// // console.log(windowData)
+// saveFile('./lua-doc-gen/output.html', classToHTML(windowData))
+
+const baseSrcPath = './pOS/'
+const baseDestPath = './lua-doc-gen/'
+const files = [
+    'os/gui/UiElement',
+    'os/gui/Window',
+    'os/gui/TextBox',
+    'os/gui/TextInput',
+    'os/gui/Button',
+    'os/gui/ScrollField',
+    'os/gui/FileSelector',
+    'os/gui/MenuOption'
+]
+files.forEach(file => {
+    var classData = parse(loadFile(baseSrcPath+file+'.lua'))
+    saveFile(baseDestPath+file+'.html', classToHTML(classData[0][0]))
+});
