@@ -83,6 +83,7 @@ class LuaClass {
         this.desc = desc || [];
         this.vars = vars || [];
         this.funcs = funcs || [];
+        this.const = undefined
     }
 
     getVar(name) {
@@ -124,7 +125,7 @@ function parse(lua) {
     for(let linenum = 0; linenum < lines.length; linenum++) {
         l = lines[linenum];
         if(l.startsWith('---@class ')) {
-            let s = l.split(/^---@class\s+([^\s:]+)(?::(\S+))?\s+(.*)$/);
+            let s = l.split(/^---@class\s+([^\s:]+)(?:\s*:\s*(\S+))?\s+(.*)$/);
             c = new LuaClass(s[1], s[2], [s[3]]);
             classes.push(c);
             for(let j = linenum; j < lines.length; j++) {
@@ -210,6 +211,15 @@ function parse(lua) {
                             /**@todo Fix this so the name of the variable is not "return"*/
                             let s = ln.split(/^---@return\s+(\S*)\s+(\S+)(?:\s+(.*))?\s*$/)
                             f.ret.push(new Variable(s[2], s[1], s[3]));
+                        } else if (ln.startsWith('---@constructor')) {
+                            // Mark this as the constructor for the named class
+                            let s = ln.split(/^---@constructor\s+/)
+                            getElemByName(classes, s[1]).const = f
+                            // funcs.pop()
+                            var index = funcs.indexOf(f);
+                            if (index !== -1) {
+                                funcs.splice(index, 1);
+                            }
                         } else {
                             f.desc.push(ln.replace(/^---\s*/, ''));
                         }
