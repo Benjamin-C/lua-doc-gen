@@ -228,30 +228,34 @@ function parse(lua) {
 // this.vars = [];
 // this.funcs = [];
 
-let r = parse(loadFile(sourcefilename))
+const toConsole = false
 
-Object.keys(r[0]).forEach((k) => {
-    c = r[0][k];
-    console.log("Class " + c.name);
-    c.desc.forEach((d) => {
-        console.log('\t' + d);
-    });
-    console.log("Fields:");
-    c.vars.forEach((k) => {
-        console.log(k.toString('\t'));
-    });
-    console.log("Methods:");
-    c.funcs.forEach((k) => {
-        console.log(k.toString('\t'));
-    });
-});
+if (toConsole) {
+    let r = parse(loadFile(sourcefilename))
 
-console.log("Functions");
-r[1].forEach((f) => {
-    console.log(f.toString());
-});
+    Object.keys(r[0]).forEach((k) => {
+        c = r[0][k];
+        console.log("Class " + c.name);
+        c.desc.forEach((d) => {
+            console.log('\t' + d);
+        });
+        console.log("Fields:");
+        c.vars.forEach((k) => {
+            console.log(k.toString('\t'));
+        });
+        console.log("Methods:");
+        c.funcs.forEach((k) => {
+            console.log(k.toString('\t'));
+        });
+    });
 
-console.log("done");
+    console.log("Functions");
+    r[1].forEach((f) => {
+        console.log(f.toString());
+    });
+
+    console.log("done");
+}
 
 
 // l = '---@field private x number Window X origin'
