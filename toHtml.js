@@ -3,16 +3,54 @@ const fs = require('fs');
 
 const classDef = './lua-doc-gen/classDef.html'
 
+const knownClassFile = './lua-doc-gen/knownClasses.json'
+var knownClasses = JSON.parse(fs.readFileSync(knownClassFile));
+
 function saveFile(path, data) {
     fs.writeFileSync(path, data)
 }
 
+// const baseDocPath = '/minecraft/cc/doc/'
+const baseDocPath = ''
+
+/**
+ * 
+ * @param {string} type 
+ * @returns 
+ */
+function typeToHtml(type) {
+    var types = [ type ]
+    if (type.includes('|')) {
+        types = type.split('|')
+    }
+    var text = '<code>'
+    for (let i = 0; i < types.length; i++) {
+        if(i > 0) text += '|'
+        var t = types[i];
+        var ts = ''
+        if (t.includes('[]')) {
+            ts = '[]'
+            t = t.replace('[]', '')
+        }
+        var kt = knownClasses[t]
+        if (kt && kt.cur == undefined) {
+            var href = kt.path
+            if (!kt.ext) {
+                href = baseDocPath + href
+            }
+            text += `<code class=type><a href='${href}' target="_blank">${t}</a>${ts}</code>`
+        }
+        else text +=  `<code class=type>${t}${ts}</code>`
+    }
+    return text + '</code>'
+}
+
 function varToHtml(variable) {
-    return `<code><code class=var>${variable.name}</code>: <code class=type>${variable.type}</code></code>`
+    return `<code><code class=var>${variable.name}</code>: ${typeToHtml(variable.type)}</code>`
 }
 
 function varToHtmlTable(variable) {
-    var html = `<tr><td><code class=type>${variable.type}</code></td><td><code class=var>${variable.name}</code></td><td>`
+    var html = `<tr><td>${typeToHtml(variable.type)}</td><td><code class=var>${variable.name}</code></td><td>`
     if (variable.vis != 'public') {
         html += `<span class=vis>${variable.vis}. </span>`
     }
@@ -48,7 +86,7 @@ function funcToHtmlTable(func) {
         for (let index = 0; index < retTypes.length; index++) {
             const ret = retTypes[index];
             if (index > 0) html += ', '
-            html += `<code class=type>${ret}</code>`
+            html += typeToHtml(ret)
         }
     } else {
         html += '<code class=nil>nil</code>'
@@ -91,12 +129,23 @@ function classToHTML(data) {
     // });
     Object.keys(data[0]).forEach((k) => {
         c = data[0][k];
+        if (!knownClasses[c.name]) {
+            knownClasses[c.name] = {
+                path: c.name
+            }
+            fs.writeFileSync(knownClassFile, JSON.stringify(knownClasses))
+            knownClasses[c.name].cur = true
+        }
         html = html.replaceAll('%ClassName%', c.name)
         var desc = c.desc.join('<br/>')
         if (c.parent != '') {
-            desc = `<h4>Inherits from <code class=type>${c.parent}</code></h4>` + desc
+            desc = `<h4>Inherits from ${typeToHtml(c.parent)}</h4>` + desc
         }
         html = html.replaceAll('%ClassDesc%', desc)
+
+        if (c.const) {
+            html = html.replaceAll('%Constructor%', funcToHtmlDb(c.const))
+        }
         
         var vars = ''
         var varDbs = ''
@@ -124,11 +173,12 @@ function classToHTML(data) {
         html = html.replaceAll('%Functions%', funcDbs)
         html = html.replaceAll('%TableInstanceFunctions%', instFuncs)
         html = html.replaceAll('%InstanceFunctions%', instFuncDbs)
+        knownClasses[c.name].cur = undefined
     });
     // console.log(html)
     return html
 }
 
-var windowData = parse(loadFile('./pOS/os/gui/Window.lua'))
+var windowData = parse(loadFile('./pOS/os/gui/ScrollField.lua'))
 // console.log(windowData)
 saveFile('./lua-doc-gen/output.html', classToHTML(windowData))

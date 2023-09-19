@@ -1,0 +1,18 @@
+{
+    "UiElement": {
+        "path": "os/gui/UiElement"
+    },
+    "Window": {
+        "path": "os/gui/Window"
+    },
+    "color": {
+        "ext": true,
+        "path": "https://tweaked.cc/module/colors.html"
+    },
+    "TextBox": {
+        "path": "os/gui/TextBox"
+    },
+    "ScrollField": {
+        "path": "os/gui/ScrollField"
+    }
+}
