@@ -122,8 +122,9 @@ function parse(lua) {
     let classes = [];
     let funcs = [];
 
-    for(let linenum = 0; linenum < lines.length; linenum++) {
+    for (let linenum = 0; linenum < lines.length; linenum++) {
         l = lines[linenum];
+        if (!l) continue;
         if(l.startsWith('---@class ')) {
             let s = l.split(/^---@class\s+([^\s:]+)(?:\s*:\s*(\S+))?\s+(.*)$/);
             c = new LuaClass(s[1], s[2], [s[3]]);

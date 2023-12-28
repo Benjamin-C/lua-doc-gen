@@ -156,6 +156,8 @@ function classToHTML(c) {
 
     if (c.const) {
         html = html.replaceAll('%Constructor%', funcToHtmlDb(c.const))
+    } else {
+        html = html.replaceAll('%Constructor%', '')
     }
     
     var vars = ''
@@ -213,9 +215,14 @@ const files = [
     'os/gui/Button',
     'os/gui/ScrollField',
     'os/gui/FileSelector',
-    'os/gui/MenuOption'
+    'os/gui/MenuOption',
+    'os/lib/classes/Logger',
+    'os/lib/classes/Config',
+    'os/user/LocalUser',
+    'os/user/RemoteUser',
 ]
 files.forEach(file => {
+    console.log('Parsing '+file)
     var classData = parse(loadFile(baseSrcPath+file+'.lua'))
     saveFile(baseDestPath+file+'.html', classToHTML(classData[0][0]))
 });
